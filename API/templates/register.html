@@ -1,0 +1,29 @@
+{% extends 'Base.html' %}
+{% load widget_tweaks %}
+{% block content %}
+    <div class="container">
+        <h2>Rejestracja użytkownika</h2>
+        <br/><br/>
+        <form method="post">
+            {% csrf_token %}
+            {% if form.errors %}
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <div class="alert alert-danger">
+                            <strong>{{ error|escape }}</strong>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        <strong>{{ error|escape }}</strong>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            <div class="form-group label-static is-empty">
+                {{ form.token.label_tag }}
+                {% render_field form.token class="form-control" placeholder="Wpisz podane hasło" %}
+            </div>
+            <button type="submit" class="btn btn-info btn-block">Wyślij</button>
+        </form>
+{% endblock %}

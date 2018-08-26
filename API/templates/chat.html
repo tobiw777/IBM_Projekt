@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container">
+    <h2>Welcome to Websocket Chat!</h2>
+    <ul id ='chat-items'>
+    <li>First test message! via Default</li>
+        </br>
+    </ul>
+    <form id="form" method="POST>"> {% csrf_token %}
+    <div class="form-group label-static is-empty">
+        <label for="message">Write your message:</label>
+        <input type="text" name="token"  placeholder="Message..." class="form-control"  id="id_message">
+    </div>
+        <input type="submit" class="btn btn-info btn-block" value="Send">
+    </form>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+    var loc = window.location
+    var msg = $('#id_message')
+    var start = 'ws://'
+    if (loc.protocol == 'https'){
+        start = 'wss://'
+    }
+    var formData = $("#form")
+
+    var list = $("#chat-items")
+
+    var endpoint = start + loc.host + loc.pathname
+
+    var socket = new WebSocket(endpoint)
+
+
+
+    socket.onopen = function (e) {
+        console.log("open", e)
+        formData.submit(function (event) {
+            event.preventDefault()
+             var text = msg.val()
+             var finalData = {
+        'Message': text
+    }
+            socket.send(JSON.stringify(finalData))
+            formData[0].reset()
+
+
+        })
+    }
+
+    socket.onmessage = function (e) {
+        console.log("message", e)
+        tp = JSON.parse(e.data)
+        console.log(tp.event)
+        if (tp.event == 'Nowy glos') {
+            var datar = JSON.parse(e.data)
+
+
+            for (var i in datar.votes) {
+                if (datar.votes[i].wynik == true) {
+                    var wyn = 'ZA'
+                }
+                else {
+                    var wyn = 'PRZECIW'
+                }
+
+                console.log(datar.votes[i])
+                list.append('<li>' + datar.votes[i].Uzytkownik + ' oddał głos: ' + wyn + ' o ' + datar.votes[i].czas + '</li>')
+            }
+
+            console.log(datar.votes.length)
+        }
+        else {
+            var datar = JSON.parse(e.data)
+
+            list.append('<li>' + datar.message + ' via ' + datar.username + '</li>')
+
+        }
+    }
+    socket.onerror = function (e) {
+        console.log("error", e)
+    }
+    socket.onclose = function (e) {
+        console.log("close", e)
+    }
+    </script>
+{% endblock %}

@@ -1,0 +1,66 @@
+<style>
+    body {
+    / / Set the padding of the results window to 10 px . padding: 10 px;
+    }
+
+    .modal-dialog.full-screen {
+        position: fixed;
+    / / width: auto;
+    / / uncomment to make the width based on the left / right attributes . margin: auto;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+    }
+
+    .modal-dialog.full-screen .modal-content {
+        position: absolute;
+        left: 10px;
+        right: 10px;
+        top: 10px;
+        bottom: 10px;
+    }
+
+    .modal-dialog.full-screen .modal-content .modal-header {
+        height: 55px;
+    / / adjust as needed .
+    }
+
+    .modal-dialog.full-screen .modal-content .modal-body {
+        overflow-y: auto;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin-top: 55px;
+    / / . modal-header height margin-bottom: 80 px;
+    / / . modal-footer height
+    }
+
+
+</style>
+<div class="modal" id="Modal" tabindex="-1" role="dialog"></div>
+
+
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+
+
+    function abrir_modal(url) {
+        $('#Modal').load(url, function () {
+            $(this).modal('show');
+        });
+        return false;
+    };
+
+    function ukryj_modal() {
+        $('#Modal').modal('hide');
+        return false;
+    };
+
+
+
+</script>

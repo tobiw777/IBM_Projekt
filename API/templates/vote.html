@@ -1,0 +1,27 @@
+<!-- cialo modalu do glosowania-->
+<div class="modal-dialog full-screen modal-lg">
+    <div class="modal-content">
+        <form role="form" action="{% url 'API:vote' %}" method="post">
+            <div class="modal-header">
+                <h3>Czy zgadzasz się z tezą?</h3>
+            </div>
+            <div class="modal-body">
+                {% csrf_token %}
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        {{ form.as_p }}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-lg-12 text-right">
+                        <input type="submit" class="btn btn-primary" name="submit" value="Glosuj">
+                        <button type="button" class="btn btn-default" onclick="return ukryj_modal()">
+                            Anuluj
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+

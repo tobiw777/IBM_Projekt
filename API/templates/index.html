@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load bootstrap4 %}
+{% bootstrap_javascript jquery=1 %}
+{% load static %}
+{% block content %}
+    {% if user.is_authenticated %}
+        <div class="container">
+            <h2>Debata Za lub Przeciw AI</h2>
+            <ul id='chat-items'>
+            </ul>
+            <a class="btn btn-info" id="nowy_glos"
+               onclick="abrir_modal('{% url 'API:vote' %}')"
+               data-toggle="modal" data-model-name="#Modal"
+               style="color: white"><i class="fa fa-user-plus" aria-hidden="true"></i>
+                Oddaj głos
+            </a>
+            {% include 'modal.html' %}
+            <div id="chart-container">FusionCharts XT will load here!</div>
+        </div>
+    {% else %}
+        <div class="container">
+            <h2>Proszę się zarejstrować</h2>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block script %}
+
+
+    <script type="text/javascript" src="{% static "fusioncharts.js" %}"></script>
+    <script type="text/javascript" src="{% static "themes/fusioncharts.theme.fusion.js" %}"></script>
+    <script type="text/javascript" src="{% static "themes/jquery-fusioncharts.js" %}"></script>
+
+
+    <script>
+
+
+        var loc = window.location
+        var msg = $('#id_message')
+        var start = 'ws://'
+        if (loc.protocol == 'https') {
+            start = 'wss://'
+        }
+
+        var list = $("#chat-items")
+        var endpoint = start + loc.host + loc.pathname
+        var socket = new WebSocket(endpoint)
+
+        var lista = null;
+
+
+        socket.onopen = function (e) {
+            console.log("open", e)
+        }
+
+        socket.onmessage = function (e) {
+            //console.log("message", e)
+            var datar = JSON.parse(e.data)
+
+            if (datar.event === 'Lista glosow') {
+                lista = datar;
+                console.log('wiele glosow');
+                console.log(lista.votes);
+                for (var i in datar.votes) {
+                    if (datar.votes[i].wynik == true) {
+                        var wyn = 'ZA'
+                    }
+                    else {
+                        var wyn = 'PRZECIW'
+                    }
+
+                    list.append('<li>' + datar.votes[i].Uzytkownik + ' oddał głos: ' + wyn + ' o ' + datar.votes[i].czas + '</li>')
+                }
+            }
+            else {
+                console.log('pojedynczy glos');
+                lista.votes.push(datar.vote);
+                if (datar.wynik == true) {
+                    lista.za += 1;
+                    var wyn = 'ZA';
+                }
+                else {
+                    lista.przeciw += 1;
+                    var wyn = 'PRZECIW';
+                }
+
+                list.append('<li>' + datar.vote.Uzytkownik + ' oddał głos: ' + wyn + ' o ' + datar.vote.czas + '</li>')
+                console.log(lista.votes);
+            }
+
+
+            var chartConfigs = {
+                type: 'doughnut3d', // The chart type
+                width: '400', // Width of the chart
+                height: '450', // Height of the chart
+                dataFormat: 'json', // Data type
+                dataSource: {
+                    // Chart Configuration
+                    "chart": {
+                        "caption": "Wyniki debaty",
+                        "showBorder": "0",
+                        "use3DLighting": "0",
+                        "enableSmartLabels": "0",
+                        "startingAngle": "310",
+                        "showLabels": "0",
+                        "showPercentValues": "1",
+                        "showLegend": "1",
+                        "defaultCenterLabel": "Total revenue: $64.08K",
+                        "centerLabel": "Revenue from $label: $value",
+                        "centerLabelBold": "1",
+                        "showTooltip": "0",
+                        "decimals": "0",
+                        "useDataPlotColorForLabels": "1",
+                        "startingAngle": "100",
+                    },
+                    // Chart Data
+                    "data": [{
+                        "label": "Za",
+                        "value": lista.za
+                    }, {
+                        "label": "Przeciw",
+                        "value": lista.przeciw
+                    }
+                    ]
+                }
+            };
+            $("#chart-container").insertFusionCharts(chartConfigs);
+
+        }
+        socket.onerror = function (e) {
+            console.log("error", e)
+        }
+        socket.onclose = function (e) {
+            console.log("close", e)
+        }
+    </script>
+{% endblock %}
